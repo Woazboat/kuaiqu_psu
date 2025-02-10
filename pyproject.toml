@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kuaiqu-psu"
+description = "Control library and CLI for KUAIQU DC power supplies"
+version = "0.1"
+keywords = ["kuaiqu", "nice-power", "regulated", "switching", "dc", "power supply", "usb", "serial"]
+dependencies = [
+    "pyserial"
+]
+authors = [
+    {name = "Woazboat"}
+]
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+readme = "README.md"
+
+
+[project.scripts]
+kuaiquctl = "kuaiqu_psu.kuaiquctl:kuaiquctl"
+
+[project.urls]
+Homepage = "https://github.com/woazboat/kuaiqu_psu"
+Repository = "https://github.com/woazboat/kuaiqu_psu.git"
+Issues = "https://github.com/woazboat/kuaiqu_psu/issues"
