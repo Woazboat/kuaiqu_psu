@@ -76,7 +76,7 @@ def kuaiquctl():
     elif args.quiet:
         logging.basicConfig(level=logging.WARNING, format='%(message)s')
 
-    with kuaiqu_psu.PowerSupply(args.serial_port) as psu:
+    with kuaiqu_psu.PowerSupply(args.serial_port, max_current=None, max_voltage=None) as psu:
         if not args.run_test:
                 if args.volt is not None:
                     psu.set_voltage(args.volt)
