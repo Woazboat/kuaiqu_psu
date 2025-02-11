@@ -125,9 +125,10 @@ class PowerSupply(AbstractContextManager[Any]):
         self.port.write(cmd_data)
         if read_response:
             rsp_data = self.port.read_until(b'>')
-            rsp_cmd = PowerSupply.Command.from_bytes(rsp_data)
-            _log.debug(f"RSP <- {rsp_data} = {rsp_cmd}")
-            return rsp_cmd
+            if rsp_data:
+                rsp_cmd = PowerSupply.Command.from_bytes(rsp_data)
+                _log.debug(f"RSP <- {rsp_data} = {rsp_cmd}")
+                return rsp_cmd
 
 
     def output(self, enable: bool):
