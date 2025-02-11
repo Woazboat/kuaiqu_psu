@@ -20,6 +20,7 @@
 
 import argparse
 import logging
+import sys
 from time import sleep
 
 _log = logging.getLogger(__name__)
@@ -32,23 +33,62 @@ TIMEOUT = 1
 def simple_test(psu: kuaiqu_psu.PowerSupply):
     psu.output(True)
     sleep(1)
-    psu.set_voltage(5.15)
+
+    if not psu.set_voltage(5.15):
+        _log.error('ERROR: Failed to set output voltage')
+        return 1
     sleep(1)
-    psu.set_current(0.250)
+
+    if not psu.set_current(0.250):
+        _log.error('ERROR: Failed to set output current limit')
+        return 1
     sleep(1)
-    _log.info(f'Voltage: {psu.read_voltage()}')
-    _log.info(f'Current: {psu.read_current()}')
+
+    v = psu.read_voltage()
+    if not v:
+        _log.error('ERROR: Failed to read voltage')
+        return 1
+    else:
+        _log.info(f'Voltage: {v}')
+    c = psu.read_current()
+    if not c:
+        _log.error('ERROR: Failed to read current')
+        return 1
+    _log.info(f'Current: {c}')
     sleep(1)
-    psu.lock_buttons(True)
+
+    if not psu.lock_buttons(True):
+        _log.error('ERROR: Failed to lock buttons')
+        return 1
     sleep(1)
-    psu.set_current(0.100)
+
+    if not psu.set_current(0.100):
+        _log.error('ERROR: Failed to set output current limit')
+        return 1
     sleep(1)
-    psu.set_voltage(3.3)
+
+    if not psu.set_voltage(3.3):
+        _log.error('ERROR: Failed to set output voltage')
+        return 1
     sleep(2)
-    psu.lock_buttons(False)
+
+    if not psu.lock_buttons(False):
+        _log.error('ERROR: Failed to unlock buttons')
+        return 1
     sleep(1)
+
     psu.output(False)
     sleep(1)
+
+    if not psu.set_voltage(0):
+        _log.error('ERROR: Failed to set output voltage')
+        return 1
+    
+    if not psu.set_current(0):
+        _log.error('ERROR: Failed to set output current limit')
+        return 1
+
+    return 0
 
 def kuaiquctl():
     parser = argparse.ArgumentParser()
@@ -79,10 +119,16 @@ def kuaiquctl():
     with kuaiqu_psu.PowerSupply(args.serial_port, max_current=None, max_voltage=None) as psu:
         if not args.run_test:
                 if args.volt is not None:
-                    psu.set_voltage(args.volt)
+                    status = psu.set_voltage(args.volt)
+                    if not status:
+                        _log.error('ERROR: Failed to set output voltage')
+                        return 1
 
                 if args.ampere is not None:
-                    psu.set_current(args.ampere)
+                    status = psu.set_current(args.ampere)
+                    if not status:
+                        _log.error('ERROR: Failed to set output current limit')
+                        return 1
 
                 if args.enable:
                     psu.output(True)
@@ -90,8 +136,10 @@ def kuaiquctl():
                     psu.output(False)
 
         else:
-            simple_test(psu)
+            return simple_test(psu)
+
+        return 0
 
 
 if __name__ == '__main__':
-    kuaiquctl()
+    sys.exit(kuaiquctl())
